@@ -451,6 +451,8 @@ function jumpTo(date, id) {
   ui.year = d.getFullYear(); ui.month = d.getMonth();
   ui.highlight = id;
   if (ui.filterDay && ui.filterDay !== date) ui.filterDay = null;
+  const m = store.getState().movs.find((x) => x.id === id);
+  if (ui.filterCat && m && m.category !== ui.filterCat) ui.filterCat = null;
   render();
 }
 
