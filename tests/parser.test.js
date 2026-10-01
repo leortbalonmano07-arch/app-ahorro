@@ -31,6 +31,16 @@ const cases = [
   ['50 céntimos chicle', { amount: 50 }],
   ['Pádel 6 euros 30/09', { amount: 600, date: '2026-09-30', category: 'deporte' }],
   ['gasto de 5 euros mañana', { date: '2026-10-02' }],
+  ['me han pagado 20 euros por un bizum de Pablo', { concept: 'Bizum de Pablo' }],
+  ['he vendido una chaqueta en Wallapop por 35 euros', { concept: 'Chaqueta en Wallapop' }],
+  ['Oye Siri añade un gasto de 23,40 en la compra del Lidl', { amount: 2340, concept: 'Compra del Lidl', category: 'super' }],
+  ['alquiler 450 euros cada mes', { amount: 45000, repeat: true, concept: 'Alquiler', category: 'casa' }],
+  ['Spotify 10,99 al mes', { amount: 1099, repeat: true, category: 'suscripciones' }],
+  ['teléfono fijo 20 euros', { repeat: false, category: 'facturas' }],
+  ['gasto de 12 euros por el motivo regalo de cumpleaños de mi madre hoy a las 5 de la tarde', { concept: 'Regalo de cumpleaños de mi madre', time: '17:00' }],
+  ['pagué la cuota del gimnasio 39,90', { amount: 3990, concept: 'Cuota del gimnasio', category: 'deporte' }],
+  ['', { amount: null }],
+  ['cena', { amount: null, concept: 'Cena' }],
 ];
 
 for (const [input, expected] of cases) {

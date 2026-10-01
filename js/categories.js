@@ -51,9 +51,12 @@ export function guessCategory(text, type = 'expense', learned = {}) {
   const list = categoriesFor(type);
   const t = ` ${text.replace(/[^a-z0-9ñ ]/g, ' ').replace(/\s+/g, ' ')} `;
   // Primero, lo que el usuario ya corrigió antes (aprendizaje simple por palabra).
-  for (const [word, catId] of Object.entries(learned)) {
-    if (t.includes(` ${word} `) && list.some((c) => c.id === catId)) return catId;
+  // (frases completas; gana la más larga)
+  let learnedHit = null;
+  for (const [phrase, catId] of Object.entries(learned)) {
+    if (t.includes(` ${phrase} `) && list.some((c) => c.id === catId) && (!learnedHit || phrase.length > learnedHit[0].length)) learnedHit = [phrase, catId];
   }
+  if (learnedHit) return learnedHit[1];
   let best = null, bestLen = 0;
   for (const c of list) {
     for (const w of c.words) {

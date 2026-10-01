@@ -75,6 +75,12 @@ h2 { font-size: 17px; margin: 0; letter-spacing: -.01em; }
 .card { background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow); padding: 18px; margin-bottom: 14px; }
 .card-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; gap: 8px; }
 
+/* Aviso de copia */
+.nag { display: flex; align-items: center; gap: 10px; background: var(--brand-soft); border-radius: 16px; padding: 10px 6px 10px 14px; margin-bottom: 14px; font-size: 14px; }
+.nag .grow { flex: 1; }
+.nag .chip { background: var(--brand); color: var(--brand-ink); font-weight: 600; font-size: 13px; }
+.nag .icon-btn { width: 32px; height: 32px; font-size: 20px; }
+
 /* Resumen */
 .hero { padding: 22px 20px 20px; }
 .hero .label { color: var(--muted); font-size: 14px; }
@@ -229,6 +235,11 @@ h2 { font-size: 17px; margin: 0; letter-spacing: -.01em; }
 .cat-chip.on { border-color: var(--brand); color: var(--text); font-weight: 600; background: var(--surface-2); }
 .heard { font-size: 13px; color: var(--muted); text-align: center; margin-top: -2px; }
 .heard i { color: var(--text); }
+
+.repeat-row { display: flex; align-items: center; gap: 12px; margin-top: 12px; padding: 12px 14px; border-radius: 14px; background: var(--surface-2); font-size: 15px; }
+.repeat-row .grow { flex: 1; }
+.repeat-row .sub { display: block; font-size: 12.5px; color: var(--muted); }
+.repeat-row input { width: 22px; height: 22px; accent-color: var(--brand); }
 
 /* Ajustes */
 .menu { display: flex; flex-direction: column; background: var(--surface-2); border-radius: 16px; overflow: hidden; margin-bottom: 14px; }

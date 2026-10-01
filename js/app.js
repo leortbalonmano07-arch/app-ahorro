@@ -45,10 +45,40 @@ function render() {
   $('#month-label').textContent = `${MONTHS[ui.month]} ${ui.year}`;
   const isCurrent = ui.year === new Date().getFullYear() && ui.month === new Date().getMonth();
   $('#next-month').style.visibility = isCurrent ? 'hidden' : 'visible';
+  renderBackupNag();
   renderHero(movs);
   renderDaily(movs);
   renderCats(movs);
   renderList(movs);
+}
+
+// Recordatorio de copia: los datos solo viven en el móvil.
+function renderBackupNag() {
+  const st = store.getState();
+  const DAY = 864e5;
+  const last = Math.max(Date.parse(st.settings.lastBackup || 0) || 0, Date.parse(st.settings.nagSnoozed || 0) || 0);
+  const show = st.movs.length >= 20 && Date.now() - last > 30 * DAY;
+  let el = $('#backup-nag');
+  if (!show) { if (el) el.remove(); return; }
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'backup-nag';
+    el.className = 'nag';
+    $('#main').prepend(el);
+  }
+  el.innerHTML = `<span>💾</span><span class="grow">Haz una copia de seguridad: tus datos solo están en este móvil.</span>
+    <button class="chip" data-act="backup">Hacer copia</button><button class="icon-btn" data-act="later" aria-label="Más tarde">×</button>`;
+  el.onclick = (e) => {
+    const act = e.target.closest('[data-act]')?.dataset.act;
+    if (act === 'backup') {
+      download(`ahorro-copia-${isoDate(new Date())}.json`, store.exportJSON(), 'application/json');
+      store.setSetting('lastBackup', new Date().toISOString());
+      render();
+    } else if (act === 'later') {
+      store.setSetting('nagSnoozed', new Date(Date.now() - 16 * DAY).toISOString()); // vuelve a avisar en 2 semanas
+      render();
+    }
+  };
 }
 
 function sums(movs) {
@@ -192,7 +222,7 @@ function renderList(movs) {
       html += `<div class="item-wrap"><div class="item-del">Borrar</div>
         <button class="item ${ui.highlight === m.id ? 'flash' : ''}" data-id="${m.id}">
           <span class="cat-emoji" style="background:${c.color}22">${c.emoji}</span>
-          <span style="min-width:0"><div class="t1">${esc(m.concept || c.name)}</div><div class="t2">${esc(c.name)}${m.time ? ' · ' + m.time : ''}</div></span>
+          <span style="min-width:0"><div class="t1">${esc(m.concept || c.name)}</div><div class="t2">${esc(c.name)}${m.time ? ' · ' + m.time : ''}${m.recId ? ' · 🔁 fijo' : ''}</div></span>
           <span class="amt num ${m.type === 'income' ? 'in' : ''}">${m.type === 'income' ? '+' : '−'}${money(m.amount)}</span>
         </button></div>`;
     }
@@ -239,7 +269,7 @@ function openVoice({ autoStart = true } = {}) {
       </form>
     </div>`, (root) => {
     const orb = $('#orb', root), tr = $('#transcript', root), input = $('#type-input', root);
-    let rec = null, finalText = '', done = false;
+    let rec = null, finalText = '', lastInterim = '', done = false, silence = null;
 
     const finish = (text) => {
       if (done) return; done = true;
@@ -251,7 +281,7 @@ function openVoice({ autoStart = true } = {}) {
 
     const start = () => {
       if (!SR) { input.focus(); return; }
-      finalText = '';
+      finalText = ''; lastInterim = '';
       rec = new SR();
       rec.lang = 'es-ES';
       rec.interimResults = true;
@@ -265,8 +295,12 @@ function openVoice({ autoStart = true } = {}) {
           const r = e.results[i];
           if (r.isFinal) finalText += r[0].transcript; else interim += r[0].transcript;
         }
+        lastInterim = interim;
         tr.classList.remove('placeholder');
         tr.textContent = (finalText + ' ' + interim).trim();
+        // Safari en iPhone a veces no cierra solo: paramos tras 1,6 s de silencio.
+        clearTimeout(silence);
+        silence = setTimeout(() => { try { rec.stop(); } catch {} }, 1600);
       };
       rec.onerror = (e) => {
         orb.classList.add('idle');
@@ -279,9 +313,10 @@ function openVoice({ autoStart = true } = {}) {
         }
       };
       rec.onend = () => {
+        clearTimeout(silence);
         orb.classList.add('idle');
-        const text = (finalText || tr.textContent || '').trim();
-        if (finalText.trim()) setTimeout(() => finish(text), 350);
+        const text = (finalText.trim() ? finalText : finalText + ' ' + lastInterim).trim();
+        if (text) setTimeout(() => finish(text), 300);
       };
       try { rec.start(); } catch { orb.classList.add('idle'); }
     };
@@ -292,7 +327,7 @@ function openVoice({ autoStart = true } = {}) {
     root.querySelectorAll('[data-ex]').forEach((b) => b.addEventListener('click', () => finish(b.dataset.ex)));
     $('#type-form', root).addEventListener('submit', (e) => { e.preventDefault(); finish(input.value); });
     if (autoStart && SR) start(); else if (!SR) setTimeout(() => input.focus(), 300);
-    return () => { done = true; if (rec) try { rec.abort(); } catch {} };
+    return () => { done = true; clearTimeout(silence); if (rec) try { rec.abort(); } catch {} };
   });
 }
 
@@ -307,6 +342,7 @@ function draftFromText(text) {
     category: cat,
     date: p.date,
     time: p.time || (p.date === isoDate(new Date()) ? nowTime() : ''),
+    repeat: p.repeat,
     raw: text,
   };
 }
@@ -315,6 +351,8 @@ function draftFromText(text) {
 function openForm(draft, { editId = null, heard = null } = {}) {
   const d = { type: 'expense', amount: null, concept: '', category: null, date: isoDate(new Date()), time: nowTime(), ...draft };
   if (!d.category) d.category = categoriesFor(d.type)[categoriesFor(d.type).length - 1].id;
+  const rec = d.recId ? store.recurringById(d.recId) : null;
+  const repeatOn = !!rec || (!editId && !!d.repeat);
   const amountStr = d.amount != null ? (d.amount / 100).toFixed(2).replace('.', ',').replace(/,00$/, '') : '';
 
   openSheet(`
@@ -331,6 +369,8 @@ function openForm(draft, { editId = null, heard = null } = {}) {
       <label class="field"><span>Día</span><input id="f-date" type="date" value="${d.date}"></label>
       <label class="field"><span>Hora</span><input id="f-time" type="time" value="${d.time || ''}"></label>
     </div>
+    <label class="repeat-row"><span>🔁</span><span class="grow">Se repite cada mes<span class="sub">Alquiler, nómina, suscripciones…</span></span>
+      <input id="f-repeat" type="checkbox" ${repeatOn ? 'checked' : ''}></label>
     <div class="sheet-actions">
       ${editId ? '<button class="btn danger" id="f-del" type="button">Borrar</button>' : '<button class="btn" id="f-cancel" type="button">Cancelar</button>'}
       <button class="btn primary" id="f-save" type="button">Guardar</button>
@@ -375,12 +415,17 @@ function openForm(draft, { editId = null, heard = null } = {}) {
       if (d.raw) mov.raw = d.raw;
       // Si el usuario cambió la categoría propuesta, la app lo recuerda para la próxima vez.
       const guessed = guessCategory(norm(concept), d.type, store.getState().learned);
-      if (concept && guessed !== d.category) store.learn(norm(concept).split(/\s+/), d.category);
+      if (concept && guessed !== d.category) store.learn([norm(concept).replace(/[^a-z0-9ñ ]/g, ' ').replace(/\s+/g, ' ').trim()], d.category);
+      const repeat = $('#f-repeat', root).checked;
+      if (rec && repeat) store.updateRecurring(rec.id, mov);
+      else if (rec && !repeat) { store.removeRecurring(rec.id); mov.recId = null; }
+      else if (!rec && repeat) mov.recId = store.addRecurring(mov).id;
       let id = editId;
       if (editId) store.updateMov(editId, mov); else id = store.addMov(mov).id;
+      if (repeat && !rec) toast('Se apuntará solo cada mes');
       closeSheet();
       jumpTo(mov.date, id);
-      toast(editId ? 'Cambios guardados' : `${mov.type === 'income' ? 'Ingreso' : 'Gasto'} de ${money(amount)} guardado`);
+      if (!(repeat && !rec)) toast(editId ? 'Cambios guardados' : `${mov.type === 'income' ? 'Ingreso' : 'Gasto'} de ${money(amount)} guardado`);
     });
     const cancel = $('#f-cancel', root);
     if (cancel) cancel.addEventListener('click', () => closeSheet());
@@ -473,7 +518,7 @@ function openSettings() {
     });
     $('#s-wipe', root).onclick = () => {
       if (confirm('¿Seguro que quieres borrar todos tus movimientos? Haz antes una copia si los quieres conservar.')) {
-        store.importJSON(JSON.stringify({ movs: [] }), { merge: false }); closeSheet(); render(); toast('Datos borrados');
+        store.importJSON(JSON.stringify({ movs: [], recurring: [] }), { merge: false }); closeSheet(); render(); toast('Datos borrados');
       }
     };
   });
@@ -505,7 +550,8 @@ function openSiriGuide() {
         <code class="code" id="siri-url">${esc(url)}</code>
         <button class="chip" id="copy-url" style="margin-top:8px">Copiar enlace</button></li>
       <li>Añade la acción <b>Abrir URL</b> (usa el «Texto» anterior).</li>
-      <li>Arriba, cambia el nombre del atajo a <b>Apunta gasto</b>. Puedes crear otro igual llamado <b>Apunta ingreso</b>.</li>
+      <li>Arriba, cambia el nombre del atajo a <b>Apunta gasto</b>. </li>
+      <li>Para ingresos: duplica el atajo, llámalo <b>Apunta ingreso</b> y añade <b>&amp;tipo=ingreso</b> al final del texto del paso 4.</li>
       <li>Pruébalo: «Oye Siri, apunta gasto» → «doce euros de cena».</li>
     </ol>
     <div class="tip">Truco: en Ajustes › Accesibilidad › Tocar › <b>Tocar atrás</b> puedes asignar el atajo a dos toques en la parte trasera del iPhone.</div>
@@ -533,7 +579,7 @@ function openInstallGuide() {
 }
 
 /* ---------- Texto que llega desde Siri / Atajos (?t=...) ---------- */
-function handleIncomingText(text) {
+function handleIncomingText(text, forcedType = null) {
   const recentKey = 'ahorro.lastIncoming';
   let recent = null;
   try { recent = JSON.parse(sessionStorage.getItem(recentKey) || localStorage.getItem(recentKey) || 'null'); } catch {}
@@ -542,9 +588,15 @@ function handleIncomingText(text) {
   try { localStorage.setItem(recentKey, JSON.stringify({ text, at: Date.now() })); } catch {}
 
   const draft = draftFromText(text);
+  if (forcedType && forcedType !== draft.type) {
+    draft.type = forcedType;
+    draft.category = guessCategory(norm(draft.concept || text), forcedType, store.getState().learned);
+  }
   const auto = store.getState().settings.siriAuto !== false;
   if (auto && draft.amount > 0) {
-    const mov = store.addMov({ type: draft.type, amount: draft.amount, concept: draft.concept, category: draft.category, date: draft.date, time: draft.time, raw: text });
+    const base = { type: draft.type, amount: draft.amount, concept: draft.concept, category: draft.category, date: draft.date, time: draft.time, raw: text };
+    if (draft.repeat) base.recId = store.addRecurring(base).id;
+    const mov = store.addMov(base);
     jumpTo(mov.date, mov.id);
     toast(`${mov.type === 'income' ? 'Ingreso' : 'Gasto'} de ${money(mov.amount)} · ${mov.concept || categoryById(mov.category).name}`, 'Editar', () => openForm(mov, { editId: mov.id }));
   } else {
@@ -555,10 +607,12 @@ function handleIncomingText(text) {
 function readIncoming() {
   const params = new URLSearchParams(location.search);
   const text = params.get('t') || params.get('texto') || params.get('q');
-  if (params.has('t') || params.has('texto') || params.has('q') || params.has('voz')) {
+  if (params.has('t') || params.has('texto') || params.has('q') || params.has('voz') || params.has('tipo')) {
     history.replaceState(null, '', location.pathname + location.hash);
   }
-  if (text && text.trim()) handleIncomingText(text.trim());
+  const tipo = norm(params.get('tipo') || '');
+  const forced = /^ingreso/.test(tipo) ? 'income' : /^gasto/.test(tipo) ? 'expense' : null;
+  if (text && text.trim()) handleIncomingText(text.trim(), forced);
   else if (params.has('voz')) openVoice();
 }
 
@@ -643,7 +697,7 @@ function bind() {
   });
 
   // Al volver a la app desde Siri (misma pestaña), Safari puede no recargar: revisamos la URL.
-  window.addEventListener('pageshow', () => { readIncoming(); render(); });
+  window.addEventListener('pageshow', () => { store.materializeRecurring(); readIncoming(); render(); });
 }
 
 function shiftMonth(delta) {
@@ -657,6 +711,7 @@ function shiftMonth(delta) {
 
 /* ---------- Arranque ---------- */
 bind();
+store.materializeRecurring();
 render();
 store.askPersist();
 if ('serviceWorker' in navigator && location.protocol === 'https:') {

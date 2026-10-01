@@ -210,7 +210,7 @@ function cleanConcept(s) {
 
 export function parse(input, now = new Date()) {
   const raw = (input || '').trim();
-  const result = { raw, type: 'expense', amount: null, concept: '', category: null, date: isoDate(now), time: null };
+  const result = { raw, type: 'expense', amount: null, concept: '', category: null, date: isoDate(now), time: null, repeat: false };
   if (!raw) return result;
 
   // Trabajamos sobre texto normalizado (sin tildes, minúsculas); conservamos el original para el concepto.
@@ -224,6 +224,10 @@ export function parse(input, now = new Date()) {
 
   const taken = [];
   const cut = (s, e) => { taken.push([s, e]); };
+
+  // "cada mes", "todos los meses", "mensual": movimiento fijo
+  const rep = t.match(/\b(?:cada\s+mes|todos\s+los\s+meses|mensual(?:mente)?|al\s+mes|es\s+fijo|gasto\s+fijo)\b/);
+  if (rep) { result.repeat = true; cut(rep.index, rep.index + rep[0].length); }
 
   const tm = findTime(t);
   if (tm) { result.time = tm.time; cut(tm.start, tm.end); }
