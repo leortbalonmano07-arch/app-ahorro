@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Ahorro</title>
+  <meta name="description" content="Tus gastos e ingresos del mes, apuntados con la voz.">
+  <meta name="theme-color" content="#f6f7f4" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0f1311" media="(prefers-color-scheme: dark)">
+  <meta name="apple-mobile-web-app-title" content="Ahorro">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <div class="app">
+    <header class="top">
+      <div class="brand">
+        <img src="icons/icon.svg" alt="" width="28" height="28">
+        <span>Ahorro</span>
+      </div>
+      <button class="icon-btn" id="btn-settings" aria-label="Ajustes">
+        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M12 15.5A3.5 3.5 0 1 1 12 8.5a3.5 3.5 0 0 1 0 7Zm7.43-2.53c.04-.32.07-.64.07-.97s-.03-.66-.07-1l2.11-1.63a.5.5 0 0 0 .12-.64l-2-3.46a.5.5 0 0 0-.61-.22l-2.49 1a7.3 7.3 0 0 0-1.69-.98l-.38-2.65A.49.49 0 0 0 14 2h-4a.49.49 0 0 0-.49.42l-.38 2.65c-.61.25-1.17.58-1.69.98l-2.49-1a.5.5 0 0 0-.61.22l-2 3.46a.49.49 0 0 0 .12.64L4.57 11c-.04.34-.07.67-.07 1s.03.65.07.97l-2.11 1.66a.49.49 0 0 0-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1.01c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l.38-2.65a7.3 7.3 0 0 0 1.69-.98l2.49 1.01c.22.08.49 0 .61-.22l2-3.46a.5.5 0 0 0-.12-.64l-2.11-1.66Z"/></svg>
+      </button>
+    </header>
+
+    <nav class="month-nav" aria-label="Mes">
+      <button class="icon-btn" id="prev-month" aria-label="Mes anterior">‹</button>
+      <button class="month-label" id="month-label" aria-label="Volver al mes actual"></button>
+      <button class="icon-btn" id="next-month" aria-label="Mes siguiente">›</button>
+    </nav>
+
+    <main id="main">
+      <section class="hero card" id="hero"></section>
+      <section class="card" id="daily-card">
+        <div class="card-head"><h2>Día a día</h2><span class="muted small" id="daily-hint">Toca un día para verlo</span></div>
+        <div class="daily" id="daily"></div>
+      </section>
+      <section class="card" id="cats-card">
+        <div class="card-head"><h2 id="cats-title">En qué se va</h2>
+          <div class="seg small" id="cats-type" role="tablist">
+            <button role="tab" data-type="expense" class="on">Gastos</button>
+            <button role="tab" data-type="income">Ingresos</button>
+          </div>
+        </div>
+        <div id="cats"></div>
+      </section>
+      <section class="list-wrap">
+        <div class="list-head">
+          <h2>Movimientos</h2>
+          <button class="chip filter-chip" id="clear-filter" hidden></button>
+        </div>
+        <div id="list"></div>
+      </section>
+    </main>
+
+    <div class="dock">
+      <button class="dock-side" id="btn-type" aria-label="Escribir un movimiento">
+        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25Zm17.71-10.21a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83Z"/></svg>
+        <span>Escribir</span>
+      </button>
+      <button class="mic" id="btn-mic" aria-label="Apuntar con la voz">
+        <svg viewBox="0 0 24 24" width="34" height="34" aria-hidden="true"><path fill="currentColor" d="M12 14a3 3 0 0 0 3-3V5a3 3 0 1 0-6 0v6a3 3 0 0 0 3 3Zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-3.08A7 7 0 0 0 19 11h-2Z"/></svg>
+      </button>
+      <button class="dock-side" id="btn-siri" aria-label="Configurar Siri">
+        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm0 3c1.2 0 2 1.8 2 4s-.8 4-2 4-2-1.8-2-4 .8-4 2-4Zm-5.5 9.5c1.7-.9 3.6-1.4 5.5-1.4s3.8.5 5.5 1.4A7 7 0 0 1 12 19a7 7 0 0 1-5.5-4.5Z"/></svg>
+        <span>Siri</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Hoja inferior reutilizable (voz, edición, ajustes) -->
+  <div class="scrim" id="scrim" hidden></div>
+  <section class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title" hidden>
+    <div class="grabber" aria-hidden="true"></div>
+    <div class="sheet-body" id="sheet-body"></div>
+  </section>
+
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
