@@ -1,5 +1,5 @@
 // Guarda la app para que abra al instante y funcione sin conexión.
-const CACHE = 'ahorro-v1';
+const CACHE = 'ahorro-v2';
 const FILES = [
   './', 'index.html', 'css/styles.css', 'js/app.js', 'js/parser.js', 'js/categories.js', 'js/store.js',
   'manifest.webmanifest', 'icons/icon.svg', 'icons/apple-touch-icon.png', 'icons/icon-192.png',

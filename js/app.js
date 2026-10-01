@@ -475,7 +475,8 @@ function toast(text, actionLabel, action) {
 }
 
 /* ---------- Ajustes ---------- */
-function appUrl() { return location.origin + location.pathname.replace(/index\.html$/, ''); }
+// Se conserva index.html si viene en la ruta: algunos servidores no sirven la carpeta sola.
+function appUrl() { return location.origin + location.pathname; }
 
 function openSettings() {
   const s = store.getState();

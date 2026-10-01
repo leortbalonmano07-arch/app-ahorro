@@ -3,7 +3,7 @@
   "short_name": "Ahorro",
   "description": "Tus gastos e ingresos del mes, apuntados con la voz.",
   "lang": "es",
-  "start_url": "./",
+  "start_url": "./index.html",
   "scope": "./",
   "display": "browser",
   "background_color": "#f6f7f4",
