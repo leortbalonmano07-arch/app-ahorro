@@ -80,5 +80,19 @@
   <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 
   <script type="module" src="js/app.js"></script>
+  <script>
+    // Si la app no arranca (navegador antiguo o error), lo decimos en pantalla en vez de quedarse muda.
+    (function () {
+      var errs = [];
+      window.addEventListener('error', function (e) { errs.push(e.message || 'error'); });
+      setTimeout(function () {
+        if (window.__ahorro) return;
+        var d = document.createElement('div');
+        d.style.cssText = 'position:fixed;left:16px;right:16px;top:16px;z-index:99;background:#d4483b;color:#fff;padding:14px;border-radius:14px;font:15px/1.4 -apple-system,system-ui,sans-serif';
+        d.textContent = 'La app no ha podido arrancar en este navegador. Prueba a actualizar el iPhone (Ajustes › General › Actualización de software). Detalle: ' + (errs.join(' | ') || 'sin error') + ' · ' + navigator.userAgent;
+        document.body.appendChild(d);
+      }, 4000);
+    })();
+  </script>
 </body>
 </html>

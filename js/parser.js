@@ -121,7 +121,9 @@ function findDate(t, now) {
   if ((m = t.match(/\b(?:hoy|esta\s+(?:manana|tarde|noche))\b/))) return { date: today, m, partOfDay: m[0] };
   if ((m = t.match(/\b(?:pasado\s+manana)\b/))) return { date: add(2), m };
   // "mañana" como día solo si no va precedido de "la"/"de la"/"por la"
-  if ((m = t.match(/(?<!\bla\s)\bmanana\b/))) return { date: add(1), m };
+  // (sin lookbehind en la regex: Safari anterior a iOS 16.4 no lo entiende y rompería toda la app)
+  m = [...t.matchAll(/\bmanana\b/g)].find((x) => !/\bla\s$/.test(t.slice(Math.max(0, x.index - 3), x.index)));
+  if (m) return { date: add(1), m };
   if ((m = t.match(/\b(?:el\s+)?(?:pasado\s+)?(domingo|lunes|martes|miercoles|jueves|viernes|sabado)(?:\s+pasado)?\b/))) {
     const target = WEEKDAYS[m[1]];
     let diff = today.getDay() - target;
