@@ -485,7 +485,7 @@ function openSettings() {
   openSheet(`
     <h3 id="sheet-title">Ajustes</h3>
     <div class="menu">
-      <button id="s-siri"><span class="ico">🗣️</span><span class="grow">Apuntar con Siri<span class="sub">Configura «Oye Siri, apunta gasto»</span></span>›</button>
+      <button id="s-siri"><span class="ico">🗣️</span><span class="grow">Apuntar con Siri<span class="sub">Configura «Oye Siri, Ahorro»</span></span>›</button>
       <button id="s-install"><span class="ico">📲</span><span class="grow">Añadir a la pantalla de inicio<span class="sub">Para abrirla como una app</span></span>›</button>
     </div>
     <div class="menu">
@@ -544,7 +544,7 @@ function openSiriGuide() {
   const url = `${appUrl()}?t=`;
   openSheet(`
     <h3 id="sheet-title">Apuntar con Siri</h3>
-    <div class="tip">Cuando esté listo, solo tendrás que decir <b>«Oye Siri, apunta gasto»</b>, contarle el gasto y la app lo guarda sola.</div>
+    <div class="tip">Cuando esté listo, solo tendrás que decir <b>«Oye Siri, Ahorro»</b>, contarle el gasto y la app lo guarda sola.</div>
     <ol class="steps">
       <li>Abre la app <b>Atajos</b> y toca <b>+</b> arriba a la derecha.</li>
       <li>Busca la acción <b>Dictar texto</b> y añádela. Toca «Idioma» y elige <b>Español (España)</b>. En «Dejar de escuchar» elige <b>Tras una pausa</b>.</li>
@@ -553,9 +553,9 @@ function openSiriGuide() {
         <code class="code" id="siri-url">${esc(url)}</code>
         <button class="chip" id="copy-url" style="margin-top:8px">Copiar enlace</button></li>
       <li>Añade la acción <b>Abrir URL</b> (usa la «URL» anterior).</li>
-      <li>Arriba, cambia el nombre del atajo a <b>Apunta gasto</b>. </li>
-      <li>Para ingresos: duplica el atajo, llámalo <b>Apunta ingreso</b> y añade <b>&amp;tipo=ingreso</b> al final de la URL del paso 4.</li>
-      <li>Pruébalo: «Oye Siri, apunta gasto» → «doce euros de cena».</li>
+      <li>Arriba, cambia el nombre del atajo a <b>Ahorro</b> (evita «apunta»: Siri lo confunde con Notas). </li>
+      <li>Para ingresos: duplica el atajo, llámalo <b>Ahorro ingreso</b> y añade <b>&amp;tipo=ingreso</b> al final de la URL del paso 4.</li>
+      <li>Pruébalo: «Oye Siri, Ahorro» → «doce euros de cena».</li>
     </ol>
     <div class="tip">Truco: en Ajustes › Accesibilidad › Tocar › <b>Tocar atrás</b> puedes asignar el atajo a dos toques en la parte trasera del iPhone.</div>
     <div class="sheet-actions"><button class="btn" id="test-siri">Probar con un ejemplo</button><button class="btn primary" id="close-siri">Hecho</button></div>
