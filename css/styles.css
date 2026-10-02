@@ -78,6 +78,8 @@ h2 { font-size: 17px; margin: 0; letter-spacing: -.01em; }
 /* Aviso de copia */
 .nag { display: flex; align-items: center; gap: 10px; background: var(--brand-soft); border-radius: 16px; padding: 10px 6px 10px 14px; margin-bottom: 14px; font-size: 14px; }
 .nag .grow { flex: 1; }
+.nag.warn { background: #fdecc8; color: #4a3200; }
+@media (prefers-color-scheme: dark) { .nag.warn { background: #3d2e0a; color: #ffe3a3; } }
 .nag .chip { background: var(--brand); color: var(--brand-ink); font-weight: 600; font-size: 13px; }
 .nag .icon-btn { width: 32px; height: 32px; font-size: 20px; }
 

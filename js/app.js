@@ -46,6 +46,7 @@ function render() {
   const isCurrent = ui.year === new Date().getFullYear() && ui.month === new Date().getMonth();
   $('#next-month').style.visibility = isCurrent ? 'hidden' : 'visible';
   renderBackupNag();
+  renderStandaloneWarning();
   renderHero(movs);
   renderDaily(movs);
   renderCats(movs);
@@ -53,6 +54,20 @@ function render() {
 }
 
 // Recordatorio de copia: los datos solo viven en el móvil.
+// Abierta como «app web» desde la pantalla de inicio, iPhone le da un almacén distinto al de Safari,
+// y Siri (Atajos) siempre guarda en Safari: los datos no se verían aquí.
+function renderStandaloneWarning() {
+  const standalone = window.navigator.standalone === true || (window.matchMedia && matchMedia('(display-mode: standalone)').matches);
+  let el = $('#standalone-warn');
+  if (!standalone) { if (el) el.remove(); return; }
+  if (el) return;
+  el = document.createElement('div');
+  el.id = 'standalone-warn';
+  el.className = 'nag warn';
+  el.innerHTML = `<span>⚠️</span><span class="grow"><b>Este icono no ve lo que apuntas con Siri.</b> Bórralo y vuelve a añadir la app desde Safari con <b>«Abrir como app web» desactivado</b>.</span>`;
+  $('#main').prepend(el);
+}
+
 function renderBackupNag() {
   const st = store.getState();
   const DAY = 864e5;
