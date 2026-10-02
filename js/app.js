@@ -549,12 +549,12 @@ function openSiriGuide() {
       <li>Abre la app <b>Atajos</b> y toca <b>+</b> arriba a la derecha.</li>
       <li>Busca la acción <b>Dictar texto</b> y añádela. Toca «Idioma» y elige <b>Español (España)</b>. En «Dejar de escuchar» elige <b>Tras una pausa</b>.</li>
       <li>Añade la acción <b>Codificar URL</b>. Debe usar el «Texto dictado».</li>
-      <li>Añade la acción <b>Texto</b> y pega este enlace, y justo detrás (sin espacio) toca la variable <b>Texto codificado en URL</b>:
+      <li>Busca la acción que se llama solo <b>URL</b> (icono azul) y añádela. Pega este enlace y, justo detrás (sin espacio), toca encima del teclado la variable <b>Texto codificado en URL</b>:
         <code class="code" id="siri-url">${esc(url)}</code>
         <button class="chip" id="copy-url" style="margin-top:8px">Copiar enlace</button></li>
-      <li>Añade la acción <b>Abrir URL</b> (usa el «Texto» anterior).</li>
+      <li>Añade la acción <b>Abrir URL</b> (usa la «URL» anterior).</li>
       <li>Arriba, cambia el nombre del atajo a <b>Apunta gasto</b>. </li>
-      <li>Para ingresos: duplica el atajo, llámalo <b>Apunta ingreso</b> y añade <b>&amp;tipo=ingreso</b> al final del texto del paso 4.</li>
+      <li>Para ingresos: duplica el atajo, llámalo <b>Apunta ingreso</b> y añade <b>&amp;tipo=ingreso</b> al final de la URL del paso 4.</li>
       <li>Pruébalo: «Oye Siri, apunta gasto» → «doce euros de cena».</li>
     </ol>
     <div class="tip">Truco: en Ajustes › Accesibilidad › Tocar › <b>Tocar atrás</b> puedes asignar el atajo a dos toques en la parte trasera del iPhone.</div>
